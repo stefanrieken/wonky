@@ -12,7 +12,7 @@ We may skip an Abstract Syntax Tree (AST) form altogether for those languages
 that both allow it (simple parsing rules) and don't support user manipulation
 of said AST (as with LISP macros).
 
-  [code] -> [parse()] -> [AST (LISP linked lists)] -> [to_postfix()] -> [code] -> [eval]
+        [code] -> [parse()] -> [AST (LISP linked lists)] -> [to_postfix()] -> [code] -> [eval]
 
 
 ## Relation to Selfish byte code
@@ -37,19 +37,19 @@ of said AST (as with LISP macros).
 
   LISP:
 
-    (if (< x 0) - +) x 1)
+        (if (< x 0) - +) x 1)
 
   =>
 
-    1 x + - 0 x .< .if .apply
+        1 x + - 0 x .< .if .apply
 
   => translate back:
 
-    (apply (if (< x 0) - +) x 1)
+        (apply (if (< x 0) - +) x 1)
 
   => to Selfish:
 
-    x.apply( (x < 0).if(#-, #+) , 1);
+        x.apply( (x < 0).if(#-, #+) , 1);
 
 
 ## Open questions applicable to either VM:
@@ -58,16 +58,16 @@ of said AST (as with LISP macros).
 
   Example:
 
-    // context a:
-    (define a 3)
-
-    (define foo (f)
-      (let (b 4) // 'b' is a known location at compile time
-        (f b)    // position of arg 'f' in memory is known as well
-      )
-    )
-
-    (foo (lambda(x) (add x a) ) ) // 'foo' and 'a' are also known locations at compile time
+        // context a:
+        (define a 3)
+        
+        (define foo (f)
+          (let (b 4) // 'b' is a known location at compile time
+            (f b)    // position of arg 'f' in memory is known as well
+          )
+        )
+        
+        (foo (lambda(x) (add x a) ) ) // 'foo' and 'a' are also known locations at compile time
 
 
 So in short, the data location for all variables is known at compile time,
