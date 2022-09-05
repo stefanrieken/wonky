@@ -17,50 +17,57 @@ of said AST (as with LISP macros).
 
 ## Relation to Selfish byte code
 
- o Both byte codes should translate names to 'name+num args' under the hood, if
-   only to allow overloading based on number of arguments (the stack should
-   normally work itself out).
+- Both byte codes should translate names to 'name+num args' under the hood, if
+  only to allow overloading based on number of arguments (the stack should
+  normally work itself out).
 
- o Selfish byte code DOES allow for label references as in Wonky: by means of an
-   explicit extra datatype.
+- Selfish byte code DOES allow for label references as in Wonky: by means of an
+  explicit extra datatype.
 
- o Selfish byte code uses '0' as an explicit clear-stack between expressions.
-   This is less of a requirement if either the target language or its translation
-   does not implicitly sequence multiple expressions as one.
+- Selfish byte code uses '0' as an explicit clear-stack between expressions.
+  This is less of a requirement if either the target language or its translation
+  does not implicitly sequence multiple expressions as one.
 
- o Selfish byte code uses negative numbers to mean 'apply(lookup(-number), stack)' .
-   This rules out direct use of pointers (unless they can be limited to positives).
-   The combined lookup-and-apply also rules out the execution of unnamed values on
-   stack (function selection expressions). This can quite simply be added in
-   translation (add explicit call to e.g. 'apply' if the preceding item was itself
-   an invocation):
+- Selfish byte code uses negative numbers to mean 'apply(lookup(-number), stack)' .
+  This rules out direct use of pointers (unless they can be limited to positives).
+  The combined lookup-and-apply also rules out the execution of unnamed values on
+  stack (function selection expressions). This can quite simply be added in
+  translation (add explicit call to e.g. 'apply' if the preceding item was itself
+  an invocation):
 
-   LISP:
-     (if (< x 0) - +) x 1)
-   =>
-     1 x + - 0 x .< .if .apply
-   => translate back:
-     (apply (if (< x 0) - +) x 1)
+  LISP:
 
-   => to Selfish:
-     x.apply( (x < 0).if(#-, #+) , 1);
+    (if (< x 0) - +) x 1)
+
+  =>
+
+    1 x + - 0 x .< .if .apply
+
+  => translate back:
+
+    (apply (if (< x 0) - +) x 1)
+
+  => to Selfish:
+
+    x.apply( (x < 0).if(#-, #+) , 1);
+
 
 ## Open questions applicable to either VM:
-   - If object-based lookup, where do we lookup a zero-arg func?
-   - Do we at all need to refer to local vars by name?
+- If object-based lookup, where do we lookup a zero-arg func?
+- Do we at all need to refer to local vars by name?
 
-     Example:
+  Example:
 
-     // context a:
-     (define a 3)
+    // context a:
+    (define a 3)
 
-     (define foo (f)
-       (let (b 4) // 'b' is a known location at compile time
-         (f b)    // position of arg 'f' in memory is known as well
-       )
-     )
+    (define foo (f)
+      (let (b 4) // 'b' is a known location at compile time
+        (f b)    // position of arg 'f' in memory is known as well
+      )
+    )
 
-     (foo (lambda(x) (add x a) ) ) // 'foo' and 'a' are also known locations at compile time
+    (foo (lambda(x) (add x a) ) ) // 'foo' and 'a' are also known locations at compile time
 
 
 So in short, the data location for all variables is known at compile time,
