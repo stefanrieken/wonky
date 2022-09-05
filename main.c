@@ -19,12 +19,11 @@ bool add(State * state) {
   return false;
 }
 
-// This neatly begs the question how we expect the user to produce the execution type from value.
-// It works with TMMH of course, but is that how we want it here?
-ExecutionType get_execution_type(void * value) {
-  printf("exec type for %d asked\n", (intptr_t) value);
-  if (((intptr_t) value) == 1) return LITERAL;
-  else return C_CALLBACK;
+bool is_primitive(void * value) {
+  // ATM this test only uses a primitive and no regular code.
+  // In general, for reference values (which both of these are)
+  // we expect the type to be derivable via the reference.
+  return true;
 }
 
 State * make_new_state_for(void * function, State * caller_state) {

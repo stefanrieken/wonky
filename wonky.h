@@ -11,15 +11,6 @@ typedef struct State {
   Stack * stack;
 } State;
 
-// There may be more types in the external system,
-// but this is all we need to know.
-typedef enum ExecutionType {
-  LITERAL,
-  C_CALLBACK,
-  CODE
-} ExecutionType;
-
-
 typedef bool (* PrimitiveCallback) (State * state);
 
 State * new_state();

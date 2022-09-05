@@ -1,5 +1,5 @@
 #  Wonkybytes
-The One Keyword byte code evaluator
+The One Key-value byte code evaluator
 
 That keyword is: 'apply' (value 0; or perhaps MAX_INT)
 All other values contain or reference data / method objects / items.

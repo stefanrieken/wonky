@@ -8,7 +8,7 @@
 
 // We expect the following callbacks to be supplied as by the library user:
 
-extern ExecutionType get_execution_type();
+extern bool is_primitive(void * func);
 
 /**
  * May be e.g.:
@@ -73,10 +73,8 @@ void eval(State * state) {
       apply:
 
       func = pop(state->stack);
-      ExecutionType func_type = get_execution_type(func);
 
-      if (func_type < C_CALLBACK) push(&(state->stack), func); // value instead of a real function; handle gracefully
-      if (func_type == C_CALLBACK) {
+      if (is_primitive(func)) {
         // The value is a C callback;
         // This callback may make actual nested / recursive calls to 'eval'
         // using the C stack instead of our own 'state-stack'.
@@ -107,7 +105,7 @@ void eval(State * state) {
           // but being marked as 'at end' should prevent it from adding to the stack during evaluation.
           goto apply;
         }
-      } else if (func_type == CODE) {
+      } else {
 
         // again, only push our own state if not at tail
         if(state->at < state->code_size) {
