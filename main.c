@@ -20,23 +20,45 @@ bool add(State * state) {
 }
 
 bool is_primitive(void * value) {
-  // ATM this test only uses a primitive and no regular code.
   // In general, for reference values (which both of these are)
   // we expect the type to be derivable via the reference.
-  return true;
+  if (value == add) return true;
+  else return false;
 }
 
 State * make_new_state_for(void * function, State * caller_state) {
-  printf("\"make new state for\"; simply returning callerstate\n");
-  return caller_state;
+
+  if (function == add) {
+    printf("\"make new state for\" add; simply returning caller state\n");
+    return caller_state;
+  } else {
+    printf("\"make new state for\" myfunc\n");
+    State * state = new_state();
+    state->code = function;
+    state->code_size = 4; // TODO how do I know this? (Answer: size should be derivable from code block contents.)
+
+    return state;
+  }
 }
 
-int main (int argc, void ** argv) {
-  State * state = new_state();
 
-  state->code = (void *[]) {(void *) 1, (void *) 1, (void *) add, (void *) 0 };
-  state->code_size = 4;
-  eval(state);
+int main (int argc, void ** argv) {
+  // In this test we use a rather optimistic mix of direct integers and full pointer values.
+  // In actual reality we might be able to combine direct (integer) values with memory indices (relative pointers).
+  // The idea for now is that we retain some flexibility (and bragging rights) if we
+  // at least try to keep any required data type encoding transparent to the eval loop.
+  // Suggestion though:
+  // 00xxxxxx... = positive int
+  // 01xxxxxx... = primitive pointer
+  // 10xxxxxx... = code or other data pointer (more info at pointer)
+  // 11xxxxxx... = negative int (two's complement)
+
+  void * myfunc = (void *[]) {(void *) 1, (void *) 1, add, (void *) 0 };
+  
+  State * state = new_state();
+  state->code = (void *[]) {myfunc, 0 };
+  state->code_size = 2;
+  state = eval(state);
   
   printf("Result of 1+1: %d\n", (intptr_t) pop(state->stack));
   return 0;

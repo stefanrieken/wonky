@@ -14,6 +14,6 @@ typedef struct State {
 typedef bool (* PrimitiveCallback) (State * state);
 
 State * new_state();
-void eval(State * state);
+State * eval(State * state);
 
 #endif /*WONKY_H*/

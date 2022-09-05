@@ -32,7 +32,7 @@ State * new_state() {
 // As opposed to the traditional "eval" / "apply" pair,
 // our organisation appears to be: eval(code) = [resolve|apply]+
 // which I think neatly represents our real-world situtation.
-void eval(State * state) {
+State * eval(State * state) {
 
   Stack * state_stack = new_stack();
 
@@ -49,9 +49,16 @@ void eval(State * state) {
     // return to a parent state
     while (! (state->at < state->code_size)) {
       State * parent = pop(state_stack);
-      if (parent == NULL) return; // all done!
 
-      // add return values
+      // TODO tail call optimization now makes it so that we end up
+      // in the end of the tail instead of at the starting 'state' object.
+      // That's why we have to return the last-current 'state' here.
+      // It would be neater if we did copy the final end result back
+      // into the starting state akin to what we do for the parent below.
+      // Perhaps this can be achieved by pushing early instead of late?
+      if (parent == NULL) return state; // all done!
+
+      // add return value
       if (has_item(state->stack)) { // it should; every statement has a return value
         push(&(parent->stack), pop(state->stack));
       }
@@ -116,10 +123,12 @@ void eval(State * state) {
         continue; // not really necessary right now; we'll loop to that spot anyway
       }
     } else {
-      // IDEALLY, we only need to do this at this point.
-      // This is only possible when pre-translation has resolved all labels, blocks, etc. for us
-      // (but retained simple values including label references).
+      // IDEALLY, we only need to do this at this point
+      // as pre-translation has resolved all labels, label refs, blocks, etc. for us.
       push(&(state->stack), value);
     }
   }
+  
+  // shouldn't get here
+  return NULL;
 }
