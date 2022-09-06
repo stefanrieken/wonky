@@ -10,6 +10,7 @@ Stack * new_stack() {
   Stack * stack = malloc(sizeof(Stack));
   stack->values = malloc(sizeof(void *) * CHUNK_SIZE);
   stack->size = 0;
+  return stack;
 }
 
 void push(Stack ** stack, void * value) {

@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "wonky.h"
 
@@ -74,14 +76,30 @@ State * eval(State * state) {
 
     state->at++; // increment early so that it points to the next item when used as continuation
 
-    if (value == KEYVAL_APPLY) {
+    //
+    // Decide whether to apply in this round and / or just push
+    //
+    bool apply = false;
+
+    if ((((intptr_t) value) & 0b11) == 0 && value <= 0) {
+      apply = true;
+    }
+    // 'Unless value is 0'
+    if (((intptr_t) value) != 0) { // value '0' == explicit apply
+      push(&(state->stack), value);
+    }
+
+    //
+    // apply
+    //
+    if (apply) {
       void * func;
 
       apply:
 
       func = pop(state->stack);
 
-      if (is_primitive(func)) {
+      if ((((intptr_t) func) & 0b11) == 0b11) {
         // The value is a C callback;
         // This callback may make actual nested / recursive calls to 'eval'
         // using the C stack instead of our own 'state-stack'.
@@ -94,12 +112,13 @@ State * eval(State * state) {
           push(&(state->stack), state);
         }
 
-        state = make_new_state_for(func, state);
-        PrimitiveCallback cb = (PrimitiveCallback) func;
+        state = make_new_state_for((void *) (((intptr_t)func) & ~0b11), state);
+        PrimitiveCallback cb = (PrimitiveCallback) (((intptr_t) func) & ~0b11);
+
         bool apply_tail = cb(state);
 
         // explicitly mark this state to be 'at end' for the purposes of our loop
-        state->at == state->code_size;
+        state->at = state->code_size;
 
         // however:
         if (apply_tail) {
@@ -112,23 +131,19 @@ State * eval(State * state) {
           // but being marked as 'at end' should prevent it from adding to the stack during evaluation.
           goto apply;
         }
-      } else {
+      } else if ((((intptr_t) func) & 0b11) == 0b10) {
 
         // again, only push our own state if not at tail
         if(state->at < state->code_size) {
           push(&state_stack, state);
         }
 
-        state = make_new_state_for(func, state);
+        state = make_new_state_for((void *) (((intptr_t) func) & ~0b11), state);
         continue; // not really necessary right now; we'll loop to that spot anyway
       }
-    } else {
-      // IDEALLY, we only need to do this at this point
-      // as pre-translation has resolved all labels, label refs, blocks, etc. for us.
-      push(&(state->stack), value);
     }
   }
-  
+
   // shouldn't get here
   return NULL;
 }
