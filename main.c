@@ -16,7 +16,7 @@ bool add(State * state) {
   intptr_t a = (intptr_t) pop(state->stack) >> 2;
   intptr_t b = (intptr_t) pop(state->stack) >> 2;
   printf("a: %ld b: %ld\n", a, b);
-  push(&(state->stack), (void*) ((a+b) << 2));
+  push(&(state->stack), (void*) (((a+b) << 2)|INTEGER));
   return false;
 }
 
@@ -54,10 +54,10 @@ int main (int argc, char ** argv) {
   // 10xxxxxx... = code or other data pointer (more info at pointer)
   // 11xxxxxx... = negative int (two's complement)
 
-  intptr_t myfunc[] = {1<<2, 1<<2, ((intptr_t)add)|0b11, 0 };
+  intptr_t myfunc[] = {(1<<2)|INTEGER, (1<<2)|INTEGER, ((intptr_t)add)|PRIMITIVE, APPLY };
 printf("add: %p myfunc: %p\n", add, myfunc);
   State * state = new_state();
-  state->code = (void *)(intptr_t[]) {((intptr_t)myfunc)|0b10, 0 };
+  state->code = (void *)(intptr_t[]) {((intptr_t)myfunc)|NATIVE, APPLY };
   state->code_size = 2;
   state = eval(state);
 

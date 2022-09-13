@@ -81,7 +81,7 @@ State * eval(State * state) {
     //
     bool apply = false;
 
-    if ((((intptr_t) value) & 0b11) == 0 && value <= 0) {
+    if ((((intptr_t) value) & 0b11) == LABEL && value <= 0) {
       apply = true;
     }
     // 'Unless value is 0'
@@ -99,7 +99,7 @@ State * eval(State * state) {
 
       func = pop(state->stack);
 
-      if ((((intptr_t) func) & 0b11) == 0b11) {
+      if ((((intptr_t) func) & 0b11) == PRIMITIVE) {
         // The value is a C callback;
         // This callback may make actual nested / recursive calls to 'eval'
         // using the C stack instead of our own 'state-stack'.
@@ -131,7 +131,7 @@ State * eval(State * state) {
           // but being marked as 'at end' should prevent it from adding to the stack during evaluation.
           goto apply;
         }
-      } else if ((((intptr_t) func) & 0b11) == 0b10) {
+      } else if ((((intptr_t) func) & 0b11) == NATIVE) {
 
         // again, only push our own state if not at tail
         if(state->at < state->code_size) {

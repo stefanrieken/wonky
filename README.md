@@ -23,8 +23,8 @@ environment object, as follows:
 
         00 - Label reference (>> 2 to produce label's number; '0' is reserved for 'apply')
         01 - Integer (>> 2 to produce value)
-        10 - Primitive pointer (mask off to produce aligned pointer)
-        11 - Native data / code pointer (mask off to produce aligned pointer)
+        10 - Native data / code pointer (mask off to produce aligned pointer)
+        11 - Primitive pointer (mask off to produce aligned pointer)
 
 1) All values will be pushed to a stack until an 'eval' marker is met.
    This is a label reference of value zero or below; the latter causes its
@@ -35,8 +35,8 @@ environment object, as follows:
 
         00 - Dynamic function lookup (using a library-user supplied callback) and invocation
         01 - Unspecified: either same as above, or return own int value
-        10 - Invoke the C callback; its form should be as specified by type PrimitiveCallback
-        11 - Eval the native data as specified under 3)
+        10 - Eval the native data as specified under 3)
+        11 - Invoke the C callback; its form should be as specified by type PrimitiveCallback
 
    In common usage, each execution takes a statically defined number of arguments
    from the stack and pushes a single result in return.
