@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "wonky.h"
 
@@ -34,8 +35,11 @@ State * make_new_state_for(void * function, State * caller_state) {
     return caller_state;
   } else {
     printf("\"make new state for\" myfunc at %p\n", function);
-    State * state = new_state();
-    state->code = function;
+    State * state = malloc(sizeof(State));
+    state->at = 0;
+    state->code =function;
+    state->env = NULL;
+    state->stack = caller_state->stack;
     state->code_size = 4; // TODO how do I know this? (Answer: size should be derivable from code block contents.)
 
     return state;
@@ -54,7 +58,9 @@ int main (int argc, char ** argv) {
   // 10xxxxxx... = code or other data pointer (more info at pointer)
   // 11xxxxxx... = negative int (two's complement)
 
-  intptr_t myfunc[] = {(1<<2)|INTEGER, (1<<2)|INTEGER, ((intptr_t)add)|PRIMITIVE, APPLY };
+  PrimitiveCallback addptr = add;
+
+  intptr_t myfunc[] = {(1<<2)|INTEGER, (1<<2)|INTEGER, ((intptr_t)&addptr)|PRIMITIVE, APPLY };
 printf("add: %p myfunc: %p\n", add, myfunc);
   State * state = new_state();
   state->code = (void *)(intptr_t[]) {((intptr_t)myfunc)|NATIVE, APPLY };

@@ -75,13 +75,18 @@ State * eval(State * state) {
     void * value = state->code[state->at];
 
     state->at++; // increment early so that it points to the next item when used as continuation
-
+//printf("At %d of %d\n", state->at, state->code_size);
     //
     // Decide whether to apply in this round and / or just push
     //
     bool apply = false;
 
+#ifdef APPLY_NEGATIVE_LABELS
+    // This needs further working out first.
     if ((((intptr_t) value) & 0b11) == LABEL && value <= 0) {
+#else
+    if (((intptr_t) value) == 0) {
+#endif
       apply = true;
     }
     // 'Unless value is 0'
@@ -109,13 +114,14 @@ State * eval(State * state) {
         if(state->at < state->code_size) {
           // If at end just let callee return directly to the parent state.
           // Otherwise continue as normal and push our state:
-          push(&(state->stack), state);
+          push(&(state_stack), state);
         }
 
         state = make_new_state_for((void *) (((intptr_t)func) & ~0b11), state);
-        PrimitiveCallback cb = (PrimitiveCallback) (((intptr_t) func) & ~0b11);
-
-        bool apply_tail = cb(state);
+        PrimitiveCallback * cb = (PrimitiveCallback*) (((intptr_t) func) & ~0b11);
+        //printf("before cb to %p; stack size=%d\n", cb, state->stack->size);
+        bool apply_tail = (*(cb))(state);
+        //printf("After cb; stack size=%d\n", state->stack->size);
 
         // explicitly mark this state to be 'at end' for the purposes of our loop
         state->at = state->code_size;

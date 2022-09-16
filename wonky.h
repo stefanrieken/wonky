@@ -1,6 +1,7 @@
 #ifndef WONKY_H
 #define WONKY_H
 
+#include <stdbool.h>
 #include "stack.h"
 
 typedef struct State {
